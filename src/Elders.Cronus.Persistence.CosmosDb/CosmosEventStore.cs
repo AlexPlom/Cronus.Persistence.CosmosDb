@@ -29,7 +29,6 @@ namespace Cronus.Persistence.CosmosDb
         public EventStream Load(IAggregateRootId aggregateId)
         {
             List<AggregateCommit> aggregateCommits = new List<AggregateCommit>();
-            int stupidityFactor = 0;
             bool hasMoreRecords = true;
             string id = Convert.ToBase64String(aggregateId.RawId);
             var options = new FeedOptions { MaxItemCount = 100 };
@@ -50,12 +49,8 @@ namespace Cronus.Persistence.CosmosDb
 
                 if (!query.HasMoreResults) hasMoreRecords = false;
 
-                if (stupidityFactor > 1000)
-                    throw new Exception("Stupidity in CosmosDB loading. Something is causing the process to cycle endlessly.");
-
                 if (options.RequestContinuation == null) //https://codeopinion.com/paging-documentdb-query-results-from-net/
                     options.RequestContinuation = result.ResponseContinuation;
-                stupidityFactor++;
             };
 
             return new EventStream(aggregateCommits);
